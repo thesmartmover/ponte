@@ -3,40 +3,361 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мой фронтенд проект</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
+    <title>Вход в систему</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .login-container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 450px;
+            padding: 40px;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .login-header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        
+        .login-header p {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .input-group input:focus {
+            border-color: #2575fc;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(37, 117, 252, 0.1);
+        }
+        
+        .input-group .requirements {
+            font-size: 13px;
+            color: #777;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .input-group .requirements::before {
+            content: "ⓘ";
+            margin-right: 5px;
+            font-size: 12px;
+        }
+        
+        .validation-icon {
+            position: absolute;
+            right: 15px;
+            top: 40px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .validation-icon.valid {
+            background-color: #4CAF50;
+            color: white;
+            opacity: 1;
+        }
+        
+        .validation-icon.valid::after {
+            content: "✓";
+        }
+        
+        .validation-icon.invalid {
+            background-color: #f44336;
+            color: white;
+            opacity: 1;
+        }
+        
+        .validation-icon.invalid::after {
+            content: "!";
+        }
+        
+        .login-button {
+            background: linear-gradient(to right, #2575fc, #6a11cb);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+        
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 15px rgba(37, 117, 252, 0.3);
+        }
+        
+        .login-button:active {
+            transform: translateY(0);
+        }
+        
+        .login-button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .register-link {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid #eee;
+        }
+        
+        .register-link a {
+            color: #2575fc;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        .register-link a:hover {
+            color: #6a11cb;
+            text-decoration: underline;
+        }
+        
+        .login-footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #999;
+            font-size: 14px;
+        }
+        
+        .error-message {
+            color: #f44336;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+            min-height: 20px;
+        }
+        
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 30px 20px;
+            }
+            
+            .login-header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Добро пожаловать в мой проект!</h1>
-        <p>Создано с помощью VSCode на Windows 10</p>
-    </header>
-    
-    <main>
-        <section>
-            <h2>О проекте</h2>
-            <p>Это простой фронтенд проект для демонстрации.</p>
-        </section>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>Вход в систему</h1>
+            <p>Введите свои учетные данные для доступа к аккаунту</p>
+        </div>
         
-        <section>
-            <h2>Технологии</h2>
-            <ul>
-                <li>HTML5</li>
-                <li>CSS3</li>
-                <li>JavaScript</li>
-                <li>Git & GitHub</li>
-            </ul>
-        </section>
+        <form id="loginForm">
+            <div class="input-group">
+                <label for="username">Логин</label>
+                <input type="text" id="username" name="username" placeholder="Введите логин" autocomplete="username">
+                <div class="validation-icon"></div>
+                <div class="requirements">Только латинские буквы (a-z) и цифры (0-9). Регистр автоматически преобразуется.</div>
+            </div>
+            
+            <div class="input-group">
+                <label for="password">Пароль</label>
+                <input type="password" id="password" name="password" placeholder="Введите пароль" autocomplete="current-password">
+                <div class="validation-icon"></div>
+                <div class="requirements">Пароль будет скрыт звездочками для безопасности.</div>
+            </div>
+            
+            <div class="error-message" id="errorMessage"></div>
+            
+            <button type="submit" class="login-button" id="loginButton" disabled>Войти</button>
+        </form>
         
-        <button id="demoButton">Нажми меня!</button>
-        <p id="demoText"></p>
-    </main>
-    
-    <footer>
-        <p>© 2024 Мой проект</p>
-    </footer>
-    
-    <script src="script.js"></script>
+        <div class="register-link">
+            <p>Еще нет аккаунта? <a href="register.html">Зарегистрироваться</a></p>
+        </div>
+        
+        <div class="login-footer">
+            <p>© 2023 Все права защищены</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const loginButton = document.getElementById('loginButton');
+            const errorMessage = document.getElementById('errorMessage');
+            const loginForm = document.getElementById('loginForm');
+            
+            // Иконки валидации для полей
+            const usernameValidationIcon = usernameInput.nextElementSibling;
+            const passwordValidationIcon = passwordInput.nextElementSibling;
+            
+            // Регулярное выражение для проверки логина (только латинские буквы в нижнем регистре и цифры)
+            const usernameRegex = /^[a-z0-9]+$/;
+            
+            // Обработчик ввода для поля логина
+            usernameInput.addEventListener('input', function(e) {
+                let value = e.target.value;
+                
+                // Преобразуем все символы в нижний регистр
+                value = value.toLowerCase();
+                
+                // Удаляем все пробелы
+                value = value.replace(/\s/g, '');
+                
+                // Удаляем все символы, кроме латинских букв и цифр
+                value = value.replace(/[^a-z0-9]/g, '');
+                
+                // Обновляем значение поля
+                e.target.value = value;
+                
+                // Проверяем валидность введенного значения
+                validateUsername();
+                updateLoginButtonState();
+            });
+            
+            // Обработчик ввода для поля пароля
+            passwordInput.addEventListener('input', function() {
+                validatePassword();
+                updateLoginButtonState();
+            });
+            
+            // Функция валидации логина
+            function validateUsername() {
+                const value = usernameInput.value;
+                const isValid = usernameRegex.test(value) && value.length > 0;
+                
+                // Обновляем иконку валидации
+                if (value.length === 0) {
+                    usernameValidationIcon.className = 'validation-icon';
+                } else if (isValid) {
+                    usernameValidationIcon.className = 'validation-icon valid';
+                    errorMessage.textContent = '';
+                } else {
+                    usernameValidationIcon.className = 'validation-icon invalid';
+                    errorMessage.textContent = 'Логин может содержать только латинские буквы (a-z) и цифры (0-9)';
+                }
+                
+                return isValid;
+            }
+            
+            // Функция валидации пароля
+            function validatePassword() {
+                const value = passwordInput.value;
+                const isValid = value.length >= 1;
+                
+                // Обновляем иконку валидации
+                if (value.length === 0) {
+                    passwordValidationIcon.className = 'validation-icon';
+                } else if (isValid) {
+                    passwordValidationIcon.className = 'validation-icon valid';
+                } else {
+                    passwordValidationIcon.className = 'validation-icon invalid';
+                }
+                
+                return isValid;
+            }
+            
+            // Функция обновления состояния кнопки входа
+            function updateLoginButtonState() {
+                const isUsernameValid = validateUsername();
+                const isPasswordValid = validatePassword();
+                
+                if (isUsernameValid && isPasswordValid) {
+                    loginButton.disabled = false;
+                } else {
+                    loginButton.disabled = true;
+                }
+            }
+            
+            // Обработчик отправки формы
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                if (!validateUsername() || !validatePassword()) {
+                    errorMessage.textContent = 'Пожалуйста, исправьте ошибки в форме';
+                    return;
+                }
+                
+                // Имитация отправки формы
+                errorMessage.textContent = '';
+                loginButton.textContent = 'Вход...';
+                loginButton.disabled = true;
+                
+                // Имитация задержки запроса на сервер
+                setTimeout(() => {
+                    alert(`Вход выполнен успешно!\nЛогин: ${usernameInput.value}\nПароль: ${'*'.repeat(passwordInput.value.length)}`);
+                    loginButton.textContent = 'Войти';
+                    loginButton.disabled = false;
+                    
+                    // Очистка формы (в реальном приложении здесь был бы редирект)
+                    // loginForm.reset();
+                    // updateLoginButtonState();
+                }, 1000);
+            });
+            
+            // Инициализация состояния кнопки
+            updateLoginButtonState();
+        });
+    </script>
 </body>
 </html>
