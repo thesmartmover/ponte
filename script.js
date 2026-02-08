@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Имитация задержки запроса на сервер
                 setTimeout(() => {
-                    alert(`Вход выполнен успешно!\nЛогин: ${usernameInput.value}\nПароль: ${'*'.repeat(passwordInput.value.length)}`);
+                    alert(`Вход выполнен успешно, но дальше не пройти!\nЛогин: ${usernameInput.value}\nПароль: ${'*'.repeat(passwordInput.value.length)}`);
                     loginButton.textContent = 'Войти';
                     loginButton.disabled = false;
                     
