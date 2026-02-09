@@ -74,9 +74,17 @@
         }
         
         .input-group input:focus {
-            border-color: #2575fc;
             outline: none;
-            box-shadow: 0 0 0 3px rgba(37, 117, 252, 0.1);
+        }
+        
+        .input-group input.valid {
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+        
+        .input-group input.invalid {
+            border-color: #f44336;
+            box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.1);
         }
         
         .input-group .requirements {
@@ -215,7 +223,7 @@
                 <label for="username">Логин</label>
                 <input type="text" id="username" name="username" placeholder="Введите логин" autocomplete="username">
                 <div class="validation-icon"></div>
-                <div class="requirements">Только латинские буквы (a-z) и цифры (0-9). Регистр автоматически преобразуется.</div>
+                <div class="requirements">Логин должен содержать только латинские буквы (a-z) и цифры (0-9). Пробелы удаляются автоматически.</div>
             </div>
             
             <div class="input-group">
@@ -252,27 +260,85 @@
             const passwordValidationIcon = passwordInput.nextElementSibling;
             
             // Регулярное выражение для проверки логина (только латинские буквы в нижнем регистре и цифры)
-            const usernameRegex = /^[a-z0-9]+$/;
+            const usernameRegex = /^[a-z0-9]*$/;
+            
+            // Функция для удаления пробелов с сохранением позиции курсора
+            function removeSpacesWithCursorPreservation(inputElement) {
+                const start = inputElement.selectionStart;
+                const end = inputElement.selectionEnd;
+                let value = inputElement.value;
+                
+                // Сохраняем исходную длину
+                const originalLength = value.length;
+                
+                // Удаляем все пробелы
+                const newValue = value.replace(/\s/g, '');
+                
+                // Если значение изменилось
+                if (newValue !== value) {
+                    // Устанавливаем новое значение
+                    inputElement.value = newValue;
+                    
+                    // Корректируем позицию курсора
+                    // Подсчитываем количество пробелов до текущей позиции курсора
+                    let spacesBeforeCursor = 0;
+                    for (let i = 0; i < Math.min(start, originalLength); i++) {
+                        if (value[i] === ' ') {
+                            spacesBeforeCursor++;
+                        }
+                    }
+                    
+                    // Новая позиция курсора = старая позиция минус количество пробелов до нее
+                    const newStart = Math.max(0, start - spacesBeforeCursor);
+                    const newEnd = Math.max(0, end - spacesBeforeCursor);
+                    
+                    // Устанавливаем новую позицию курсора
+                    setTimeout(() => {
+                        inputElement.setSelectionRange(newStart, newEnd);
+                    }, 0);
+                }
+                
+                return newValue;
+            }
             
             // Обработчик ввода для поля логина
             usernameInput.addEventListener('input', function(e) {
-                let value = e.target.value;
+                // Сохраняем текущую позицию курсора
+                const start = e.target.selectionStart;
+                
+                // Удаляем пробелы с сохранением позиции курсора
+                let value = removeSpacesWithCursorPreservation(e.target);
                 
                 // Преобразуем все символы в нижний регистр
                 value = value.toLowerCase();
                 
-                // Удаляем все пробелы
-                value = value.replace(/\s/g, '');
-                
-                // Удаляем все символы, кроме латинских букв и цифр
-                value = value.replace(/[^a-z0-9]/g, '');
-                
-                // Обновляем значение поля
-                e.target.value = value;
+                // Если значение изменилось после преобразования в нижний регистр
+                if (value !== e.target.value) {
+                    e.target.value = value;
+                    // Устанавливаем курсор в конец, если были изменения регистра
+                    setTimeout(() => {
+                        e.target.setSelectionRange(value.length, value.length);
+                    }, 0);
+                }
                 
                 // Проверяем валидность введенного значения
                 validateUsername();
                 updateLoginButtonState();
+            });
+            
+            // Обработчик события вставки текста
+            usernameInput.addEventListener('paste', function(e) {
+                // Даем браузеру вставить текст, затем обрабатываем
+                setTimeout(() => {
+                    // Удаляем пробелы и преобразуем в нижний регистр
+                    let value = e.target.value;
+                    value = value.replace(/\s/g, '').toLowerCase();
+                    e.target.value = value;
+                    
+                    // Проверяем валидность
+                    validateUsername();
+                    updateLoginButtonState();
+                }, 0);
             });
             
             // Обработчик ввода для поля пароля
@@ -284,15 +350,21 @@
             // Функция валидации логина
             function validateUsername() {
                 const value = usernameInput.value;
-                const isValid = usernameRegex.test(value) && value.length > 0;
+                const isValid = usernameRegex.test(value);
                 
-                // Обновляем иконку валидации
+                // Обновляем класс поля ввода
                 if (value.length === 0) {
+                    usernameInput.classList.remove('valid', 'invalid');
                     usernameValidationIcon.className = 'validation-icon';
+                    errorMessage.textContent = '';
                 } else if (isValid) {
+                    usernameInput.classList.remove('invalid');
+                    usernameInput.classList.add('valid');
                     usernameValidationIcon.className = 'validation-icon valid';
                     errorMessage.textContent = '';
                 } else {
+                    usernameInput.classList.remove('valid');
+                    usernameInput.classList.add('invalid');
                     usernameValidationIcon.className = 'validation-icon invalid';
                     errorMessage.textContent = 'Логин может содержать только латинские буквы (a-z) и цифры (0-9)';
                 }
@@ -305,12 +377,17 @@
                 const value = passwordInput.value;
                 const isValid = value.length >= 1;
                 
-                // Обновляем иконку валидации
+                // Обновляем класс поля ввода
                 if (value.length === 0) {
+                    passwordInput.classList.remove('valid', 'invalid');
                     passwordValidationIcon.className = 'validation-icon';
                 } else if (isValid) {
+                    passwordInput.classList.remove('invalid');
+                    passwordInput.classList.add('valid');
                     passwordValidationIcon.className = 'validation-icon valid';
                 } else {
+                    passwordInput.classList.remove('valid');
+                    passwordInput.classList.add('invalid');
                     passwordValidationIcon.className = 'validation-icon invalid';
                 }
                 
@@ -345,11 +422,11 @@
                 
                 // Имитация задержки запроса на сервер
                 setTimeout(() => {
-                    alert(`Вход выполнен успешно, но дальше не пройти!\nЛогин: ${usernameInput.value}\nПароль: ${'*'.repeat(passwordInput.value.length)}`);
+                    alert(`Вход выполнен успешно!\nЛогин: ${usernameInput.value}\nПароль: ${'*'.repeat(passwordInput.value.length)}`);
                     loginButton.textContent = 'Войти';
                     loginButton.disabled = false;
                     
-                    // Очистка формы (в реальном приложении здесь был бы редирект)
+                    // В реальном приложении здесь был бы редирект
                     // loginForm.reset();
                     // updateLoginButtonState();
                 }, 1000);
